@@ -45,21 +45,22 @@ static EVENT_HANDLER(physical_ready) {
 
     CNET_read_physical(&link, frame, &length);
     CNET_write_application(frame, &length);
-    printf("\tI receive a message of %4d bytes from address %s\n", length, frame);
+    printf("\tI receive a message of %4d bytes\n", length);
     
 }
-
 
 EVENT_HANDLER(reboot_node)
 {
 /*  Indicate that we are interested in hearing about the Application Layer
     having messages for delivery and indicate which function to invoke for them.
  */
+    const int server_node = 200;
+    
     CNET_set_handler(EV_APPLICATIONREADY, application_ready, 0);
     CNET_set_handler(EV_PHYSICALREADY, physical_ready, 0);
 
     CNET_set_handler(EV_DEBUG0, button_pressed, 0);
     CNET_set_debug_string(EV_DEBUG0, "Node Info");
 
-    CNET_enable_application(ALLNODES);
+    CNET_enable_application(server_node);
 }

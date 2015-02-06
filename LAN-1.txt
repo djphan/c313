@@ -10,7 +10,7 @@ mapwidth=200m, mapheight=150m, mapgrid= 50m, mapscale= 0.3
 minmessagesize= 1000bytes
 maxmessagesize= 1000bytes
 
-lan-probframecorrupt= 0
+lan-probframecorrupt= 2
 
 messagerate= 1000ms
 

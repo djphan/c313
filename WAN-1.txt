@@ -12,8 +12,8 @@ maxmessagesize= 1000bytes
 
 wan-bandwidth=  128000bps
 
-//wan-bandwidth=  256000bps
-wan-probframecorrupt= 0
+
+wan-probframecorrupt= 2
 
 messagerate = 1000ms
 

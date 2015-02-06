@@ -11,8 +11,9 @@ minmessagesize= 1000bytes
 maxmessagesize= 1000bytes
 
 
-wlan-bandwidth= 128000bps
-wlan-probframecorrupt= 0
+wlan-bandwidth= 256000bps
+
+wlan-probframecorrupt= 2
 
 messagerate= 1000ms
 
