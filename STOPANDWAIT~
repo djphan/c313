@@ -17,11 +17,8 @@ host perth {
 
 router R1 {east east of perth, 
             address= 12, 
-            link to R2}
-
-router R2 {east east east of perth, 
-            address= 13, 
             link to sydney}
+
 
 host sydney {
     east east east east east of perth
