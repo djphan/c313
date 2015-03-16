@@ -1,0 +1,203 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>CMPUT313 - Flooding</title>
+</head>
+
+<body alink="#FF0000" background="CMPUT313%20-%20Flooding_files/granite.html" link="#0000EE" vlink="#551A8B">
+
+<pre>		Experiments with Flooding Algorithms
+		------------------------------------
+
+Suggested Activity
+==================
+
+1. Getting Started
+==================
+- Make a copy of the "flooding" directory into a new "lab3" directory
+  (we are going to make some changes to the files!)
+
+- Read the "1st.README", "2nd.README", and the block comment at the top of
+  each "flooding*.c" program to know the main features of the programs.
+
+- Note that all three programs implement a (partial) stop-and-wait
+  protocol that works as follows:
+	After a source node "S" sends an application message to a
+	destination "D", node "S" disables its own application layer
+	from generating a new message to "D" until an ACK with a
+	correct sequence number is received from "D".
+  The protocol, however, does not perform retransmissions.
+
+  (So, what purpose does this protocol serve? This aspect is examined further
+   in the assignment.)
+
+2. Exploring the Supplied Scripts
+=================================
+- Execute "sh getfloodstats" then "gnuplot plotfloodstats.gp" to get
+  an "efficiency-versus-time" graph of all three flooding programs.
+
+3. The "gnuplot" Script
+=======================
+- Note that you can use gnuplot to generate a graph in a number of formats
+  (e.g., "gif", and also "fig" for editing using the "xfig" program).
+
+- Example: Copy "plotfloodstats.gp" to "plotGIF.gp".
+           Modify "plotGIF.gp" by adding:
+
+	   set term gif
+           set output "out.gif"
+	   ...
+	   ...		 
+	   # comment out the next line:
+           # pause -1
+
+4. The "shell" Script
+=====================
+- Note that the command: "cnet -W -q -T -e ... " can also be invoked
+  from a Makefile.
+
+- Example: Modify the supplied Makefile by adding the following lines
+	   (note the TAB before "cnet") and then execute "make test1"
+	   and "make test2".
+
+           DURATION=5m
+           EVERY=30s
+           TOPOLOGY= FLOODING2
+	   MAP= AUSTRALIA.MAP
+
+	   test1:  clean
+		   cnet -W -q -T -e ${DURATION} -s -f ${EVERY} ${TOPOLOGY}
+
+	   test2:  clean
+		   cnet    -W -q -T -e ${DURATION} -s -f ${EVERY} \
+                	   -C "flooding2.c dll_basic.c nl_table.c" ${MAP}
+ 
+
+- Note that the input to the "cut d: -f 2" command has the form
+	Efficiency (bytes AL) / (bytes PL)  : 4.16
+	Efficiency (bytes AL) / (bytes PL)  : 5.57
+	Efficiency (bytes AL) / (bytes PL)  : 5.89
+	...
+  and the "cut" program splits each line around the separator ":"
+  and keeps only the second field. So, the corresponding output is:
+	4.16
+	5.57
+	5.89
+	...
+  The "awk "{ printf(\"%d %s\n\", ++i * $EVERY, \$1); }"" command
+  then processes each input line and produces a corresponding 
+  output line, so we get:
+        5   4.16
+	10  5.57
+	15  5.89
+	...
+  in the "result.flood2" file, for example.
+
+- Copy "getfloodstats" to "getMD". Copy "plotfloodstats.gp" to "plotMD.gp"
+  Modify "getMD" and "plotMD.gp" to print the "Messages delivered" 
+  global statistic.
+
+
+5. Generating Random Connected Networks
+=======================================
+
+- The supplied "AUSTRALIA.MAP" topology file has 8 hosts, and "WORLD.MAP"
+  has 35 hosts. To generate a random connected network with NNODES
+  (say, NNODES= 15), and store the result in file "N15", one may use:
+
+	cnet -p -r 15 | grep -v nicaddr &gt; N15
+
+  Note: "grep" is used to omit lines containing "nicaddr" strings.
+        Unlike "lan" and "wlan" interfaces, cnet does not allow the user
+	to specify a "wan" link interface address. cnet, however,
+        generates such interface addresses when processing a topology file.
+
+- If needed, edit the generated file "N15" to fix the "compile=" string
+
+
+6. Exploring the Performance of "flooding3.c"
+==============================================
+- This part explores the performance of "flooding3.c" when
+  * each pair of hosts are separated by at least one router, and
+  * links lose frames.
+
+- The required changes are:
+  * Modify "flooding3.c" to handle routers by surrounding the declaration
+    of the application ready handler by the following if-statement:
+  
+    if (nodeinfo.nodetype == NT_HOST) {
+        CHECK(CNET_set_handler(EV_APPLICATIONREADY, down_to_network, 0));
+        CNET_enable_application(ALLNODES);
+    }
+
+  * Modify "dll_basic.c" to use "CNET_write_physical" instead of
+    "CNET_write_physical_reliable".
+
+  * Include "wan-probframeloss = 1" (so, the link loss probability is
+    "1 / pow(base=2, power= 1)") in the topology file.
+
+  * Make a copy of a topology file, introduce a router between each pair
+    of adjacent hosts. For example, the links between Melbourne and
+    Adelaide, Sydney, and Hobart become
+
+	host Melbourne  { x=366, y=324, link to M-A, link to M-S, link to M-H }
+	router M-A      { wan to Adelaide }
+	router M-S      { wan to Sydney }
+	router M-H      { wan to Hobart }
+
+- Run "flooding3.c" on both topology files for 5 or more minutes and
+  record the following global statistics:
+      * Efficiency
+      * Messages delivered
+
+- Explain the effect of adding routers on the recorded values.
+
+
+7. More On Command Line Usage: Directing Node Output to Files
+=============================================================
+- This part suggests modifications to periodically store information computed
+  by each node in a node specific file. This feature simplifies the development
+  and debugging of protocols without relying on the debugging buttons supported by the GUI.
+
+- The suggested modifications are:
+  * Modify function "show_NL_table" in file "nl_table.c" to print the simulation time
+    when the function is invoked. This is done by adding the "printf" line below:
+
+    static EVENT_HANDLER(show_NL_table)
+    {
+        CNET_clear();
+        printf("\n time (since last reboot)= %s usecs\n", CNET_format64(nodeinfo.time_in_usec));
+        ...
+        ...
+    }
+
+  * Modify function "reboot_NL_table" in file "nl_table.c" to make function "show_NL_table"
+    a handler for event "EV_PERIODIC". This is done by adding the "CNET_set_handler" line
+    below:
+
+    void reboot_NL_table(void)
+    {
+        ...
+        ...		
+	CHECK(CNET_set_handler(EV_PERIODIC, show_NL_table, 0));
+	...
+	...
+    }
+
+ * Create a new directory, say "debug", to store the generated per-node files.
+
+ * Run any of the three flooding programs, say "flooding3.c", using:
+   
+      cnet -W -q -T -e 300s -s -f 100s -o debug/%n FLOODING3
+
+   This line raises the "EV_PERIODIC" event every 100 seconds which (by the above
+   modification) causes the program to execute function "show_NL_table". The "-o" switch
+   causes CNET to store the printed lines in a node-specific file in directory "debug".
+
+   CNET substitutes the "%n" string with node names when creating new files in directory
+   "debug". You may use the "%n" string as part of a filename string (e.g., "out.%n").
+		------------------------------
+
+</pre>
+
+
+</body></html>

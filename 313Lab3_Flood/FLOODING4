@@ -1,0 +1,54 @@
+
+messagerate      = 200ms,
+propagationdelay = 100ms,
+bandwidth	 = 56Kbps,
+
+compile		 = "flooding3.c dll_basic.c nl_table.c"
+
+mapimage	 = "australia.gif"
+
+host Perth {
+    x=80, y=290
+    link to Adelaide 
+}
+host Canberra {
+    x=440, y=320
+    link to Melbourne 
+    link to Sydney 
+}
+host Melbourne {
+	x=366, y=324 
+	link to M-A 
+	link to M-S 
+	link to M-H
+}
+
+router M-A      { wan to Adelaide }
+router M-S      { wan to Sydney }
+router M-H      { wan to Hobart }
+
+host Sydney {
+    x=510, y=320
+    link to Canberra 
+    link to Melbourne 
+    link to Hobart 
+    link to Brisbane 
+}
+host Hobart {
+    x=450, y=460
+    link to Melbourne 
+    link to Sydney 
+}
+host Brisbane {
+    x=520, y=220
+    link to Sydney 
+}
+host Adelaide {
+    x=330, y=310
+    link to Melbourne 
+    link to Darwin 
+}
+host Darwin {
+    x=280, y=50
+    link to Adelaide 
+}
