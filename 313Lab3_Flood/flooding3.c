@@ -155,6 +155,9 @@ EVENT_HANDLER(reboot_node)
     reboot_DLL();
     reboot_NL_table();
 
-    CHECK(CNET_set_handler(EV_APPLICATIONREADY, down_to_network, 0));
-    CHECK(CNET_enable_application(ALLNODES));
+	// Change from Intro
+	if (nodeinfo.nodetype == NT_HOST) {
+		CHECK(CNET_set_handler(EV_APPLICATIONREADY, down_to_network, 0));
+		CHECK(CNET_enable_application(ALLNODES));
+	}
 }

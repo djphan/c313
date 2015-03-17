@@ -17,7 +17,8 @@ typedef struct {
 /*  down_to_datalink() RECEIVES PACKETS FROM THE NETWORK LAYER (ABOVE) */
 int down_to_datalink(int link, char *packet, size_t length)
 {
-    CHECK(CNET_write_physical_reliable(link, (char *)packet, &length));
+	 CHECK(CNET_write_physical(link, (char *)packet, &length));
+    //CHECK(CNET_write_physical_reliable(link, (char *)packet, &length));
     return(0);
 }
 
